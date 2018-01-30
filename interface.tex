@@ -1,0 +1,111 @@
+\documentclass{article}
+\usepackage{listings,talk,minted}
+
+\title{The Case for \interface}
+\author{Sam Whited}
+\date{February 02, 2018}
+
+\begin{document}
+\maketitle
+\abstract{%
+	The empty interface (\interface) is one of the most interesting, powerful,
+	and easily abused features of Go, but there are use cases for which it is
+	uniquely and excellently suited.
+	In this talk for the Go devroom, I will propose a set of rules which can be
+	used to see if your use of \interface\ will be the elegant and simple API
+	that \interface\ promised, or merely lead to a maintainability nightmare down
+	the road.
+}
+
+\section{Introduction}
+
+In this crowd I suspect I don't have to start with an explanation of \interface\
+or its dangers, but let me briefly lay out a few assumptions that will be
+essential going forward:
+
+\begin{itemize}
+	\item{In Go, interfaces should describe behavior, not data}
+	\item{\interface\ is easy to abuse (and thus, is abused; widely and often)}
+	\item{\interface\ is code for ``dynamic typing"}
+\end{itemize}
+
+That is to say, whenever I say ``\interface", you should hear ``dynamic typing".
+Let us also assume that it's widely acknowledged that if you can describe your
+behavior with a more specific type, you should.
+Finally, let us take it as a given that heavy use of reflection leads to
+difficult to maintain code.
+If you don't agree, please attempt to make changes to one of the
+\pkg{encoding/*} packages and then get back to me.
+
+\section{Library Maintainability}
+
+Let's start by talking about maintainability by taking an example from the
+standard library, in fact, from \pkg{encoding/xml}:
+
+\begin{lstlisting}
+	// Marshal returns the XML encoding of v.
+	func Marshal(v interface{}) ([]byte, error)
+\end{lstlisting}
+
+We can say that this function ``consumes" a dynamically typed value.
+Because, as Rob Pike famously said, ``empty interface says nothing", it must
+rely on a mix of type switching and reflection to determind how the value should
+be marshaled into XML.
+For primitive types and types defined in the \pkg{encoding/xml} package this
+works well enough, we type switch and the package can perform some pre-defined
+behavior.
+For example, if the type is an \method{xml.Marshaler} it can call its
+\method{MarshalXML} method, or if it is a primitive type the logic for
+marshaling the type is already contained in the package.
+However, for types that are defined outside of the \pkg{encoding/xml} package
+things are more complicated. Type erasure means we have no information about
+a user defined struct; no methods to call, no known fields, etc.
+Since no information is known about the type we either must limit the usability
+of the package by not allowing user defined types or gather the information we
+need using reflection, leading to maintainability problems.
+As I said before, if you've ever tried to modify \pkg{encoding/xml} or
+\pkg{encoding/json}, you'll know what I'm talking about: part of your code base
+is heavily reflection based, and part of your code is normal, idiomatic Go.
+It becomes difficult to reconcile the two distinct code bases.
+
+The \method{MarshalXML} API is simple, even elegant, from the users perspective.
+The user doesn't know or care about the type of data: they put arbitrary data in
+and get some serialized representation of that data out.
+This contract is reflected with appropriate types in the function signature.
+However, from the library developers perspective things became very hard to
+maintain because the library \emph{does} need to care about the type of the data
+being put in.
+When the \emph{producer} of some data does not care about the type, but the
+\emph{consumer} does, the library becomes difficult to maintain.
+
+Rephrased, this becomes our first rule for using \interface:
+``The producer of the \interface must also be the consumer of the \interface."
+
+\section{Application Maintainability}
+
+Let's talk about the \pkg{context} package.
+
+\inputminted{go}{example2.go}
+
+\pkg{context} does not have the same problems as \pkg{encoding/xml}.
+Context is commonly used to write HTTP middleware, and when doing so, a library
+using context generally defines the key and value, for instance in a
+"WithSessionID" middleware, and generally also provides a way to consume that
+value ("GetSessionID").
+This API means that the context package does not need to make heavy use of
+reflection, and the package is a study in simplicity.
+If you're learning to write idiomatic Go and haven't looked at the source of
+\pkg{context}, I highly recommend it.
+
+However, \pkg{context} has a different problem: a value stored in an empty
+interface in context may be modified by many different producers, and consumed
+by many different consumers.
+This means that if I add middleware to write a request ID into my context, and
+then someone else adds my middleware to an existing pipeline later my request
+ID may end up being silently masked further down the context tree.
+This, and the fact that context trees may have many values appended to them,
+leads to a great deal of complexity at the application layer.
+The producer of our \interface\ is also the consumer, but it may produce or
+consume values multiple times from many locations.
+
+\end{document}

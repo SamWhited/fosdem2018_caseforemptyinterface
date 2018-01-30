@@ -1,0 +1,181 @@
+\PassOptionsToPackage{usenames,dvipsnames,xcolor=x11names,table}{xcolor}
+\documentclass[xelatex,aspectratio=169]{beamer}
+
+\usepackage{xifthen,multicol,textcomp,graphicx,talk,minted,epigraph}
+\usepackage{fontspec}
+\usepackage{tikz,amsmath}
+\usepackage[binary-units=true]{siunitx}
+\usepackage{array, booktabs}
+%\usepackage{graphicx}
+%\usepackage[x11names]{xcolor}
+%\usepackage{colortbl}
+\usepackage{caption}
+\DeclareCaptionFont{blue}{\color{Blue}}
+\newcommand{\foo}{\color{Blue}\makebox[0pt]{\textbullet}\hskip-0.5pt\vrule width 1pt\hspace{\labelsep}}
+\usetikzlibrary{arrows,decorations.pathreplacing,decorations.text}
+\newcommand*{\tikzmark}[1]{\tikz[overlay, remember picture] \coordinate ({#1});}
+
+\usetheme{FOSDEM}
+\usecolortheme{whale}
+%\beamertemplatenavigationsymbolsempty
+
+\title[]{The Case for \interface}
+\subtitle{FOSDEM'18}
+\author[]{%
+	Sam Whited\\*%
+	{\tiny JID: \texttt{\href{xmpp:sam@samwhited.com}{sam@samwhited.com}}}%
+}
+\date{2017--02--03}
+\titlegraphic{\includegraphics[width=20mm]{images/cf-logo-v-rgb.png}\hspace*{.25\textwidth}\includegraphics[width=20mm]{images/xmpp.png}}
+
+% Define a font family that supports IPA characters.
+\newfontfamily\ipa{Charis SIL}
+
+\begin{document}
+
+\section{Intro}
+
+\begin{frame}
+	\maketitle
+\end{frame}
+
+\newfontfamily\blackout{Blackout}
+\begin{frame}
+	\begin{center}
+		\LARGE\interface
+	\end{center}
+
+\only<2>{%
+	\color{Red}\blackout
+	\begin{tikzpicture}[remember picture, overlay]
+		\node [shift={(-3cm,2.3cm)}] at (current page.south east) {%
+			\begin{tikzpicture}[decoration={text effects along path,
+						text={Fear! Thrills! Horror!},
+						text effects/.cd,
+						path from text, path from text angle=60,
+						character count=\i, character total=\n,
+						characters={text along path, scale=\i/\n+1}}]
+							\path[decorate] (0,2) .. controls ++(2,0) and ++(-2,0) .. (6,4);
+			\end{tikzpicture}
+		};
+	\end{tikzpicture}
+}
+\end{frame}
+
+% \section{Abstract}
+% \begin{frame}
+% 	\frametitle{Abstract}
+% 	The empty interface (\interface) is one of the most interesting, powerful, and
+% 	easily abused features of Go, but there are use cases for which it is uniquely
+% 	and excellently suited.
+% 	In this talk for the Go devroom, I will propose a set of rules which can be
+% 	used to see if your use of \interface\ will be the elegant and simple API that
+% 	\interface\ promised, or merely lead to a maintainability nightmare down the
+% 	road.
+% \end{frame}
+
+\section{Assumptions}
+\begin{frame}
+	\ttfamily%
+	The following requirements keywords as used in this document are to be
+	interpreted as described in RFC 2119: "MUST", "SHALL", "REQUIRED"; "MUST NOT",
+	"SHALL NOT"; "SHOULD", "RECOMMENDED"; "SHOULD NOT", "NOT RECOMMENDED"; "MAY",
+	"OPTIONAL".
+	\begin{tikzpicture}[remember picture,overlay]
+		\node [xshift=-0.25\textwidth,yshift=6em] at (current page.south east)
+		{\includegraphics[width=7em]{images/gopherhorse.png}};
+	\end{tikzpicture}
+\end{frame}
+
+\begin{frame}
+	\only<1>{\setbeamercolor{item}{fg=Violet}}
+	\only<2>{\setbeamercolor{item}{fg=CheetoOrange}}
+	\only<3>{\setbeamercolor{item}{fg=Mauve}}
+	\only<4>{\setbeamercolor{item}{fg=Slate}}
+	\only<5->{\setbeamercolor{item}{fg=LimeGreen}}
+	\begin{enumerate}
+		\item<1> In Go, interfaces should describe behavior, not data
+		\item<2> \interface\ is easy to abuse (and thus, is abused; widely and often)
+		\item<3> \interface\ is code for ``dynamic typing"
+		\item<4> If you can describe your behavior with a more specific type, you should
+		\item<5-> Heavy use of reflection leads to difficult to maintain code
+	\end{enumerate}
+	\begin{center}
+		\only<6->{\LARGE \pkg{encoding/\{json,xml\}}}
+	\end{center}
+	\only<7->{\vspace*{\fill}}
+	\begin{flushright}
+		\only<7>{Q.E.D.}
+	\end{flushright}
+	\vspace*{\fill}
+	\begin{tikzpicture}[remember picture,overlay]
+		\only<1->{
+		\node [xshift=0.25\textwidth,yshift=2.5em] at (current page.south west)
+		{\includegraphics[width=20mm]{images/gopher.png}};}
+	\end{tikzpicture}
+\end{frame}
+
+\section{\pkg{encoding/xml}}
+\frame{\LARGE \sectionpage}
+
+\begin{frame}
+	\only<1,3->{\inputminted{go}{example1.go}}
+	\only<2>{\epigraph{Empty interface says nothing}{Rob Pike, Gopherfest 2015}}
+	\begin{enumerate}
+		\item<4-> 1\hspace*{10.5em}→ <int>1</int>
+		\item<5-> ``To sit in solemn silence" → <string>To sit in solemn silence</string>
+		\item<6-> \type{xml.Marshaler}\hspace*{4.2em}→ \method{T.MarshalXML(e, start)}
+		\item<7-> struct\{ Name string \}\hspace*{1.8em}→ ???\only<8->{\ (reflection!)}
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}
+	\Large
+	``When the \emph{producer} of some data does not care about the type, but the
+	\emph{consumer} does, the library becomes difficult to maintain."
+\end{frame}
+
+\begin{frame}
+	\Large
+	\textbf{Rule \textnumero 1}\\
+	The producer of the \interface\ must also be the consumer of the \interface.
+\end{frame}
+
+\section{\pkg{context}}
+\frame{\LARGE \sectionpage}
+
+\begin{frame}
+	\inputminted{go}{example2.go}
+\end{frame}
+
+\begin{frame}
+	\inputminted{go}{example3.go}
+\end{frame}
+
+\section{fin}
+
+\newfontfamily\calluna{Calluna}
+\begin{frame}
+	\Large
+	\calluna
+	\begin{figure}
+	{\color{AshGray}%
+		\tikzmark{begin}sam\tikzmark{atsep}@%
+		\tikzmark{domainpart}\textcolor{Cyan}{SamWhited}\tikzmark{tld}.com\tikzmark{end}%
+	}
+
+		\tikz[overlay,remember picture] {
+			\draw[decorate,decoration={brace,raise=5mm,amplitude=15pt}] (begin.north
+			west) -- node [above=1.75em] {\small email \& jid} (end.north east) ;
+			\draw[decorate,decoration={brace,raise=2mm,amplitude=5pt,mirror}]
+			(begin.south west) -- node[below of=begin, below=-1.35em] {\tiny me} (atsep.south west) ;
+			\draw[decorate,decoration={brace,raise=2mm,amplitude=5pt,mirror}]
+			(domainpart.south west) -- node[below of=begin, below=-1.35em] {\tiny twitter
+			\addfontfeature{Variant=1}{\&} freenode } (tld.south west) ;
+			\draw[decorate,decoration={brace,raise=6mm,amplitude=10pt,mirror}]
+			(domainpart.south west) -- node[below of=begin, below=-.125em] {\tiny blog} (end.south west) ;
+		}
+	\end{figure}
+\end{frame}
+
+\end{document}

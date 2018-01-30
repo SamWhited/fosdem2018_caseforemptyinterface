@@ -1,0 +1,68 @@
+\DeclareOptionBeamer{compress}{\beamer@compresstrue}
+\ProcessOptionsBeamer
+
+\mode<presentation>
+
+\useoutertheme[footline=authortitle,subsection=false]{miniframes}
+\useinnertheme{circles}
+\usecolortheme{whale}
+\usecolortheme{orchid}
+
+% Atlassian Primary Colors
+% https://design.atlassian.com/product/foundations/colors/
+
+\definecolor{Navy}{HTML}{205081}
+\definecolor{Red}{HTML}{D04437}
+\definecolor{Yellow}{HTML}{F6C342}
+\definecolor{Green}{HTML}{14892C}
+\definecolor{MediumGray}{HTML}{EBF2F9}
+\definecolor{PaleBlue}{HTML}{707070}
+\definecolor{Blue}{HTML}{EBF2F9}
+\definecolor{Charcoal}{HTML}{333333}
+\definecolor{LightGray}{HTML}{F5F5F5}
+
+% Secondary Colors
+
+\definecolor{BrightPink}{HTML}{F15C75}
+\definecolor{Rosie}{HTML}{F691B2}
+\definecolor{Gray}{HTML}{999999}
+\definecolor{AshGray}{HTML}{CCCCCC}
+\definecolor{Cyan}{HTML}{59AFE1}
+\definecolor{CoolBlue}{HTML}{84BBC6}
+\definecolor{Slate}{HTML}{4A6785}
+\definecolor{Violet}{HTML}{654982}
+\definecolor{MidGreen}{HTML}{67AB49}
+\definecolor{LimeGreen}{HTML}{8EB021}
+\definecolor{CheetoOrange}{HTML}{F79232}
+\definecolor{Mauve}{HTML}{AC707A}
+\definecolor{Brown}{HTML}{815B3A}
+\definecolor{fosdemPurple}{HTML}{B824CE}
+
+\definecolor{beamer@blendedblue}{HTML}{1A8CFF}
+
+\setbeamercolor{structure}{fg=fosdemPurple}
+\setbeamercolor{titlelike}{parent=structure}
+\setbeamercolor{frametitle}{fg=black}
+\setbeamercolor{title}{fg=black}
+\setbeamercolor{item}{fg=black}
+
+\setbeamertemplate{mini frames}{}
+
+\setbeamertemplate{section page}{%
+    \begin{centering}
+    \begin{beamercolorbox}[sep=12pt,center]{part title}
+    \usebeamerfont{section title}\insertsection\par
+    \end{beamercolorbox}
+    \end{centering}
+}
+
+\setbeamertemplate{subsection page}{%
+    \begin{centering}
+    \begin{beamercolorbox}[sep=12pt,center]{part title}
+    \usebeamerfont{subsection title}\insertsubsection\par
+    \end{beamercolorbox}
+    \end{centering}
+}
+
+\mode
+<all>
