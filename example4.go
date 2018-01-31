@@ -1,13 +1,13 @@
-func AddErrorLogger(
+func AddMetrics(
 	ctx context.Context,
-	logger log.Logger,
+	metrics prometheus.Registry,
 ) context.Context {
 	/* … */
 }
 
-func AddDebugLogger(
+func AddDatabase(
 	ctx context.Context,
-	logger log.Logger,
+	db *sql.DB,
 ) context.Context {
 	/* … */
 }
