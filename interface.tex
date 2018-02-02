@@ -1,5 +1,5 @@
 \documentclass{article}
-\usepackage{listings,talk,minted}
+\usepackage{listings,talk,minted,multicol}
 
 \title{The Case for \interface}
 \author{Sam Whited}
@@ -104,17 +104,91 @@ signals, and other request-scoped values across API boundaries and between
 processes."
 Let's stop for a moment to think about ``request scoped values" means.
 I suspect the intent was for that short list to include things like:
-
 \begin{enumerate}
 	\item Request ID
 	\item Session ID
 	\item Trace ID
 \end{enumerate}
-
 And that's about it really: anything that should be accessable from anywhere
 that can reference the request and ends with ``ID".
-However, I suspect we've all seen (or, like me, participated in) the horror that
+
+Unfortunately, I suspect we've all seen the horror that
 is a developer who's used to certain Java web frameworks discovering Go's
 ``dependency injection package":
+
+\begin{multicols}{2}
+	\inputminted{go}{example3.go}
+\end{multicols}
+
+This is an understandable mistake, and soon corrected.
+Side channel APIs that are, effectively, stringly-typed quickly become a
+maintainability problem when scaling your team to a size greater than one.
+So why do developers abuse context as a side-channel API for dependency
+injection so often?
+
+Certainly it can be partially attributed to new Go users coming from other
+languages where this is an accepted pattern, but there is also a simpler answer:
+``because they can."
+As a rule if something can be abused, it will.
+And in this case the abuse is made possible by context's use of the empty
+interface.
+Take, for example the logging middleware mentioned earlier:
+
+\inputminted{go}{example5.go}
+
+This is broken \emph{because} of our first rule: the producer of the value in
+the \interface\ is also the consumer, and therefore they can use the \interface\
+to create a side channel API, passing arbitrary values between
+\method{ServeHTTP} calls.
+We've traded unmaintainability in our library for unmaintainability in our
+user's library or application by allowing them to produce and consume
+\interface\ typed values.
+To fix this, we need another rule:
+``\interface\ should not cross package boundaries."
+If you must use \interface\ in your library, ensure that it is an implementation
+detail and not leaked in a usable way by any exported function or method.
+
+Finally, let's look at an example that follows these rules:
+
+\inputminted{go}{example6.go}
+
+The Simple Authentication and Security Layer (SASL) is an authentication
+framework defined by RFC 4422.
+You probably use it every time you access your email, auth to Freenode, etc.
+The specifcs don't matter, except that SASL supports many authentication
+mechanisms; these are things like plain text, SCRAM, OAUTH2, etc. and that,
+because these mechanisms may require multiple round trips to the server there is
+generally a state machine, the ``\struct{Negotiator}" in this API, that controls
+the auth flow, ensures that steps cannot be repeated, and generally enforces
+security constraints.
+
+As you can see, the \struct{Mechanism} makes use of \interface.
+In each step of the state machine the selected mechanism's `\method{Next}'
+function is called.
+\struct{Mechanism}, for reasons that don't matter here, must remain stateless.
+Unfortunately, mechanisms also may need data from previous steps, and this state
+must be stored somewhere.
+Since mechanisms are used by a state machine, which is (obviously) already
+stateful, it makes sense to store that state as part of the \struct{Negotiator}.
+SASL is also a very flexible framework, so we don't necessarily know what that
+data will be: sounds like a job for \interface.
+Each time the `\method{Next}' function is called it optionally returns a value
+that will be needed in a future step.
+The negotiator then stores this state, and the next time it calls \method{Next}
+it passes in the stored value.
+In practice, a stateless \struct{Mechanism}'s \method{Next} functions end up
+looking something like this:
+
+\pagebreak
+\inputminted{go}{example7.go}
+
+The mechanism is not only the producer of the value in the interface (the
+``cache" return parmeter), it is also the consumer of the value (the ``data"
+argument), so it meets our first requirement.
+This \interface\ is also an internal implementation detail: it never leaks
+outside of the package.
+Together, this means that \struct{Mechanism}'s remain simple: reflection is not
+necessary, and the \interface\ is not a part of a public API, so it can't be
+used to expose a side-channel for smuggling data into a system.
 
 \end{document}

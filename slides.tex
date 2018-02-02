@@ -121,12 +121,12 @@
 \begin{frame}
 	\only<1,3->{\inputminted{go}{example1.go}}
 	\only<2>{\epigraph{Empty interface says nothing}{Rob Pike, Gopherfest 2015}}
-	\begin{enumerate}
+	\only<4->{\begin{enumerate}}
 		\only<4->{\setbeamercolor{item}{fg=Yellow}\item{1\hspace*{10.5em}→ <int>1</int>}}
 		\only<5->{\setbeamercolor{item}{fg=Red}\item{``To sit in solemn silence" → <string>To sit in solemn silence</string>}}
 		\only<6->{\setbeamercolor{item}{fg=MidGreen}\item{\type{xml.Marshaler}\hspace*{4.2em}→ \method{T.MarshalXML(e, start)}}}
 		\only<7->{\setbeamercolor{item}{fg=Slate}\item{struct\{ Name string \}\hspace*{1.8em}→ ???\only<8->{\ (reflection!)}}}
-	\end{enumerate}
+	\only<4->{\end{enumerate}}
 \end{frame}
 
 \begin{frame}
@@ -135,9 +135,10 @@
 	\emph{consumer} does, the library becomes difficult to maintain."
 \end{frame}
 
+\section{\pkg{Rule \textnumero 1}}
 \begin{frame}
 	\Large
-	\textbf{Rule \textnumero 1}\\
+	\strong{Rule \textnumero 1}\\
 	The producer of the \interface\ must also be the consumer of the \interface.
 \end{frame}
 
@@ -175,6 +176,49 @@
 		\columnbreak
 		\inputminted{go}{example4.go}
 	\end{multicols}
+\end{frame}
+
+\begin{frame}
+		\inputminted{go}{example5.go}
+\end{frame}
+
+\section{\pkg{Rule \textnumero 2}}
+\begin{frame}
+	\Large
+	\strong{Rule \textnumero 2}\\
+	\interface\ should not cross package boundaries.
+\end{frame}
+
+\section{\pkg{sasl}}
+\frame{\LARGE \sectionpage}
+
+\begin{frame}
+	\inputminted{go}{example6.go}
+\end{frame}
+
+% \begin{frame}
+% 	\setlength{\lineskip}{0pt}
+% 	┌────────────┐ ┌───────────┐
+% 	│ Negotiator │ │ Mechanism │
+% 	└─────┬──────┘ └─────┬─────┘
+%         │              │
+%         │              │
+%         │              │
+%         │              │
+% 	┌─────┴──────┐ ┌─────┴─────┐
+% 	│ Negotiator │ │ Mechanism │
+% 	└────────────┘ └───────────┘
+% \end{frame}
+
+\begin{frame}
+	\inputminted{go}{example7.go}
+\end{frame}
+
+\section{\pkg{Rule \textnumero 3}}
+\begin{frame}
+	\Large
+	\strong{Rule \textnumero 3}\\
+	You must always be able to assert the type of the \interface.
 \end{frame}
 
 \section{fin}
