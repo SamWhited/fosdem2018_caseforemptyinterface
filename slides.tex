@@ -1,5 +1,5 @@
 \PassOptionsToPackage{usenames,dvipsnames,xcolor=x11names,table}{xcolor}
-\documentclass[xelatex,aspectratio=169]{beamer}
+\documentclass[xelatex,aspectratio=43]{beamer}
 
 \usepackage{xifthen,multicol,textcomp,graphicx,talk,minted,epigraph}
 \usepackage{fontspec}
@@ -23,7 +23,7 @@
 \subtitle{FOSDEM'18}
 \author[]{%
 	Sam Whited\\*%
-	{\tiny JID: \texttt{\href{xmpp:sam@samwhited.com}{sam@samwhited.com}}}%
+	{\tiny XMPP: \texttt{\href{xmpp:sam@samwhited.com}{sam@samwhited.com}}}%
 }
 \date{2017--02--03}
 \titlegraphic{\includegraphics[width=20mm]{images/cf-logo-v-rgb.png}\hspace*{.25\textwidth}\includegraphics[width=20mm]{images/xmpp.png}}
@@ -150,16 +150,13 @@
 \end{frame}
 
 \begin{frame}
-	% TODO: better quotation formatting?
 	\texttt{\color{MidGreen}// }\textit{%
-		Package context defines the Context type, which carries deadlines,
-		cancelation}\\
+		Package context defines the Context type, which carries}\\
 	\texttt{\color{MidGreen}// }\textit{%
-		signals, and other
-		\only<1>{request-scoped values}\only<2>{\strong{request-scoped values}}
-		across API boundaries and
-		between}\\
-	\texttt{\color{MidGreen}// }\textit{processes.}
+		deadlines, cancelation signals, and other \only<1>{request-scoped}\only<2>{\strong{request-scoped}}}\\
+	\texttt{\color{MidGreen}// }\textit{%		
+		\only<1>{values}\only<2>{\strong{values}} across API boundaries and
+		between processes.}
 \end{frame}
 
 \begin{frame}
@@ -196,20 +193,6 @@
 	\inputminted{go}{example6.go}
 \end{frame}
 
-% \begin{frame}
-% 	\setlength{\lineskip}{0pt}
-% 	┌────────────┐ ┌───────────┐
-% 	│ Negotiator │ │ Mechanism │
-% 	└─────┬──────┘ └─────┬─────┘
-%         │              │
-%         │              │
-%         │              │
-%         │              │
-% 	┌─────┴──────┐ ┌─────┴─────┐
-% 	│ Negotiator │ │ Mechanism │
-% 	└────────────┘ └───────────┘
-% \end{frame}
-
 \begin{frame}
 	\inputminted{go}{example7.go}
 \end{frame}
@@ -235,7 +218,7 @@
 
 		\tikz[overlay,remember picture] {
 			\draw[decorate,decoration={brace,raise=5mm,amplitude=15pt}] (begin.north
-			west) -- node [above=1.75em] {\small email \& jid} (end.north east) ;
+			west) -- node [above=1.75em] {\small email \& xmpp} (end.north east) ;
 			\draw[decorate,decoration={brace,raise=2mm,amplitude=5pt,mirror}]
 			(begin.south west) -- node[below of=begin, below=-1.35em] {\tiny me} (atsep.south west) ;
 			\draw[decorate,decoration={brace,raise=2mm,amplitude=5pt,mirror}]

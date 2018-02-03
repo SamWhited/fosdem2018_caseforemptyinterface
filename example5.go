@@ -5,10 +5,11 @@ type LogKey struct{}
 
 // AddLogger adds a log.Logger to a request.
 // No really, Don't do this.
-func AddLogger(next http.Handler, l *log.Logger) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func AddLogger(next Handler, l *log.Logger) HandlerFunc {
+	return func(w ResponseWriter, r *Request) {
 		ctx := r.Context()
-		ctx = context.WithValue(ctx, LogKey{}, logger)
+		ctx = context.WithValue(
+			ctx, LogKey{}, logger)
 		r = r.WithContext(ctx)
 		h.ServeHTTP(w, r)
 	}
